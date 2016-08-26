@@ -1,0 +1,38 @@
+[
+  {
+    "category": "anti-social-behaviour",
+    "location_type": "Force",
+    "location": {
+      "latitude": "52.625325",
+      "street": {
+        "id": 882469,
+        "name": "On or near Draper Street"
+      },
+      "longitude": "-1.110284"
+    },
+    "context": "",
+    "outcome_status": null,
+    "persistent_id": "",
+    "id": 20606881,
+    "location_subtype": "",
+    "month": "2013-01"
+  },
+  {
+    "category": "anti-social-behaviour",
+    "location_type": "Force",
+    "location": {
+      "latitude": "52.637161",
+      "street": {
+        "id": 883042,
+        "name": "On or near Vulcan Road"
+      },
+      "longitude": "-1.112261"
+    },
+    "context": "",
+    "outcome_status": null,
+    "persistent_id": "",
+    "id": 20605036,
+    "location_subtype": "",
+    "month": "2013-01"
+  }
+]
