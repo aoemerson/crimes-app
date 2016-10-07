@@ -25,12 +25,12 @@ public class PoliceClientImpl implements PoliceClient {
 
         @Override
         public void onResponse(Call<List<Crime>> call, Response<List<Crime>> response) {
-            listener.onLoadComplete(response.body());
+            listener.onCrimesLoadComplete(response.body());
         }
 
         @Override
         public void onFailure(Call<List<Crime>> call, Throwable t) {
-            listener.onLoadError(t);
+            listener.onCrimesLoadError(t);
         }
     }
 

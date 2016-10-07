@@ -13,6 +13,6 @@ import retrofit2.http.Query;
 public interface PoliceRestClient {
 
     @GET("crimes-street/all-crime")
-    Call<List<Crime>> getCrimesByPoint(@Query("lat") float lat, @Query("lng") float lng);
+    Call<List<Crime>> getCrimesByPoint(@Query("lat") double lat, @Query("lng") double lng);
 
 }

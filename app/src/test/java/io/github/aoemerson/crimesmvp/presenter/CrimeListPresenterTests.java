@@ -68,7 +68,7 @@ public class CrimeListPresenterTests {
         Crime crime2 = new Crime();
         crime2.setCategory("two");
         List<Crime> crimes = Arrays.asList(crime1, crime2);
-        crimesPresenter.onLoadComplete(crimes);
+        crimesPresenter.onCrimesLoadComplete(crimes);
         verify(crimesView, times(1)).setCrimes(crimes);
         verify(crimesView, times(1)).hideProgress();
     }

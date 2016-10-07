@@ -7,11 +7,11 @@ import io.github.aoemerson.crimesmvp.model.data.Crime;
 public interface PoliceClient {
 
     interface OnCrimesLoadedListener {
-        void onLoadComplete(List<Crime> crimes);
-        void onLoadError(Throwable t);
+        void onCrimesLoadComplete(List<Crime> crimes);
+        void onCrimesLoadError(Throwable t);
 
     }
 
-    void requestCrimesByPoint(float lat, float lng, OnCrimesLoadedListener listener);
+    void requestCrimesByPoint(double lat, double lng, OnCrimesLoadedListener listener);
 
 }

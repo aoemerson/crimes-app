@@ -37,7 +37,7 @@ public class CrimesModelTests {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 List<Crime> crimes = deserialiseTest1Crimes();
-                ((PoliceClient.OnCrimesLoadedListener) invocation.getArguments()[2]).onLoadComplete(crimes);
+                ((PoliceClient.OnCrimesLoadedListener) invocation.getArguments()[2]).onCrimesLoadComplete(crimes);
                 return null;
             }
         };
@@ -55,12 +55,12 @@ public class CrimesModelTests {
     public void canDeserialisePoliceJsonWithCallback() {
         policeClient.requestCrimesByPoint(52.629729f, -1.131592f, new PoliceClient.OnCrimesLoadedListener() {
             @Override
-            public void onLoadComplete(List<Crime> crimes) {
+            public void onCrimesLoadComplete(List<Crime> crimes) {
                 checkTest1Crimes(crimes);
             }
 
             @Override
-            public void onLoadError(Throwable t) {
+            public void onCrimesLoadError(Throwable t) {
 
             }
         });
