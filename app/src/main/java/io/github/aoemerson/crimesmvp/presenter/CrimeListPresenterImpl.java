@@ -2,8 +2,8 @@ package io.github.aoemerson.crimesmvp.presenter;
 
 import java.util.List;
 
-import io.github.aoemerson.crimesmvp.model.Crime;
-import io.github.aoemerson.crimesmvp.model.CurrentLocationProvider;
+import io.github.aoemerson.crimesmvp.model.data.Crime;
+import io.github.aoemerson.crimesmvp.model.location.CurrentLocationProvider;
 import io.github.aoemerson.crimesmvp.model.PoliceClient;
 import io.github.aoemerson.crimesmvp.model.PoliceClientImpl;
 import io.github.aoemerson.crimesmvp.view.CrimesView;

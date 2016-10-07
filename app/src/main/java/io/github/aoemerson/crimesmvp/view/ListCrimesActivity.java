@@ -3,16 +3,13 @@ package io.github.aoemerson.crimesmvp.view;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import java.util.List;
 
 import aoemeron.github.io.crimesmvp.R;
-import io.github.aoemerson.crimesmvp.model.Crime;
-import io.github.aoemerson.crimesmvp.model.PoliceClientImpl;
+import io.github.aoemerson.crimesmvp.model.data.Crime;
 import io.github.aoemerson.crimesmvp.presenter.CrimeListPresenter;
 import io.github.aoemerson.crimesmvp.presenter.CrimeListPresenterImpl;
 

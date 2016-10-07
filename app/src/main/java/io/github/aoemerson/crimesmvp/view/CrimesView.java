@@ -2,7 +2,7 @@ package io.github.aoemerson.crimesmvp.view;
 
 import java.util.List;
 
-import io.github.aoemerson.crimesmvp.model.Crime;
+import io.github.aoemerson.crimesmvp.model.data.Crime;
 
 /**
  * Created by Andrew on 17/08/2016.

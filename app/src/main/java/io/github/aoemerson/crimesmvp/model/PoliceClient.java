@@ -2,9 +2,8 @@ package io.github.aoemerson.crimesmvp.model;
 
 import java.util.List;
 
-/**
- * Created by Andrew on 17/08/2016.
- */
+import io.github.aoemerson.crimesmvp.model.data.Crime;
+
 public interface PoliceClient {
 
     interface OnCrimesLoadedListener {

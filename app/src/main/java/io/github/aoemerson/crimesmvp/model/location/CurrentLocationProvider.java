@@ -1,4 +1,4 @@
-package io.github.aoemerson.crimesmvp.model;
+package io.github.aoemerson.crimesmvp.model.location;
 
 /**
  * Created by Andrew on 17/08/2016.

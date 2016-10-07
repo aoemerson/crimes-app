@@ -2,6 +2,7 @@ package io.github.aoemerson.crimesmvp.model;
 
 import java.util.List;
 
+import io.github.aoemerson.crimesmvp.model.data.Crime;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;

@@ -14,6 +14,8 @@ import org.mockito.stubbing.Answer;
 import java.io.IOException;
 import java.util.List;
 
+import io.github.aoemerson.crimesmvp.model.data.Crime;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;

@@ -1,4 +1,4 @@
-package io.github.aoemerson.crimesmvp.model;
+package io.github.aoemerson.crimesmvp.model.location;
 
 import android.Manifest;
 import android.content.Context;
@@ -8,9 +8,6 @@ import android.support.v4.app.ActivityCompat;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
-/**
- * Created by Andrew on 26/08/2016.
- */
 public class GoogleFusedLocationProvider implements CurrentLocationProvider {
 
     private GoogleApiClient googleApiClient;

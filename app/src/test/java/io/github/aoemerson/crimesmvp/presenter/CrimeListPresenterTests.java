@@ -6,7 +6,6 @@ import org.junit.runner.RunWith;
 
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyFloat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,8 +19,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.Arrays;
 import java.util.List;
 
-import io.github.aoemerson.crimesmvp.model.Crime;
-import io.github.aoemerson.crimesmvp.model.CurrentLocationProvider;
+import io.github.aoemerson.crimesmvp.model.data.Crime;
+import io.github.aoemerson.crimesmvp.model.location.CurrentLocationProvider;
 import io.github.aoemerson.crimesmvp.model.PoliceClient;
 import io.github.aoemerson.crimesmvp.view.CrimesView;
 

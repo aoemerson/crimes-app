@@ -8,7 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import aoemeron.github.io.crimesmvp.R;
-import io.github.aoemerson.crimesmvp.model.Crime;
+import io.github.aoemerson.crimesmvp.model.data.Crime;
 
 /**
  * Created by Andrew on 17/08/2016.
