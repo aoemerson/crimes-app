@@ -6,7 +6,6 @@ import org.junit.runner.RunWith;
 
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyFloat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,8 +19,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.Arrays;
 import java.util.List;
 
-import io.github.aoemerson.crimesmvp.model.Crime;
-import io.github.aoemerson.crimesmvp.model.CurrentLocationProvider;
+import io.github.aoemerson.crimesmvp.model.data.Crime;
+import io.github.aoemerson.crimesmvp.model.location.CurrentLocationProvider;
 import io.github.aoemerson.crimesmvp.model.PoliceClient;
 import io.github.aoemerson.crimesmvp.view.CrimesView;
 
@@ -41,7 +40,7 @@ public class CrimeListPresenterTests {
 
     @Before
     public void setup() {
-        crimesPresenter = new CrimeListPresenterImpl(crimesView, policeClient, locationProvider);
+        crimesPresenter = new CrimeListPresenterImpl(policeClient, locationProvider);
     }
 
     @Test
@@ -69,13 +68,13 @@ public class CrimeListPresenterTests {
         Crime crime2 = new Crime();
         crime2.setCategory("two");
         List<Crime> crimes = Arrays.asList(crime1, crime2);
-        crimesPresenter.onLoadComplete(crimes);
+        crimesPresenter.onCrimesLoadComplete(crimes);
         verify(crimesView, times(1)).setCrimes(crimes);
         verify(crimesView, times(1)).hideProgress();
     }
 
     @Test
-    public void shouldGetLocalCrimes() {
+    public void shouldGetLocalCrimes() throws CurrentLocationProvider.MissingPermissionException {
         crimesPresenter.onRequestLocalCrimes();
         verify(crimesView, times(1)).showProgress();
         verify(locationProvider, times(1)).requestCurrentLocation(eq(crimesPresenter));

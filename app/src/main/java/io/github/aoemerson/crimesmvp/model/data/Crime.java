@@ -1,4 +1,4 @@
-package io.github.aoemerson.crimesmvp.model;
+package io.github.aoemerson.crimesmvp.model.data;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">CrimesMVP</string>
+    <string name="err_location_permission_denied">You need to grant loction permissions to show
+        local crimes.
+    </string>
+    <string name="err_location_not_obtained">Could not find current location - showing default.
+    </string>
+    <string name="err_could_not_load_crimes">Unable to load crimes - try again later.</string>
 </resources>

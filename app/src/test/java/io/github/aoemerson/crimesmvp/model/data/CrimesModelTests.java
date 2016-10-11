@@ -1,4 +1,4 @@
-package io.github.aoemerson.crimesmvp.model;
+package io.github.aoemerson.crimesmvp.model.data;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,6 +13,9 @@ import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.util.List;
+
+import io.github.aoemerson.crimesmvp.model.PoliceClient;
+import io.github.aoemerson.crimesmvp.model.data.Crime;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -35,7 +38,7 @@ public class CrimesModelTests {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 List<Crime> crimes = deserialiseTest1Crimes();
-                ((PoliceClient.OnCrimesLoadedListener) invocation.getArguments()[2]).onLoadComplete(crimes);
+                ((PoliceClient.OnCrimesLoadedListener) invocation.getArguments()[2]).onCrimesLoadComplete(crimes);
                 return null;
             }
         };
@@ -53,12 +56,12 @@ public class CrimesModelTests {
     public void canDeserialisePoliceJsonWithCallback() {
         policeClient.requestCrimesByPoint(52.629729f, -1.131592f, new PoliceClient.OnCrimesLoadedListener() {
             @Override
-            public void onLoadComplete(List<Crime> crimes) {
+            public void onCrimesLoadComplete(List<Crime> crimes) {
                 checkTest1Crimes(crimes);
             }
 
             @Override
-            public void onLoadError(Throwable t) {
+            public void onCrimesLoadError(Throwable t) {
 
             }
         });
