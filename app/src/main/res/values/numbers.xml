@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="default_latitude" type="dimen" format="float">51.509865</item>
+    <item name="default_longitude" type="dimen" format="float">-0.118092</item>
+</resources>

@@ -30,4 +30,8 @@ public interface CurrentLocationProvider {
     }
 
     void requestCurrentLocation(LocationRequestCallback callback) throws GoogleFusedLocationProvider.MissingPermissionException;
+    void connect();
+    void disconnect();
+    void requestDefaultLocation(LocationRequestCallback callback);
+
 }

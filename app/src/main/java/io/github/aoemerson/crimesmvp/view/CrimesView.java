@@ -18,6 +18,8 @@ public interface CrimesView {
     void hideProgress();
     void requestLocationPermission(LocationPermissionRequestCallback callback);
     boolean isProgressShown();
-
-    void showError(@StringRes int errResId);
+    void showCrimesLoadingError();
+    void showLocationPermissionDeniedError();
+    void showLocationUnavailableError();
+    boolean hasLocationPersmission();
 }

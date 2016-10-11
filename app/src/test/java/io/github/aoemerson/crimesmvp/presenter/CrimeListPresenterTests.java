@@ -40,7 +40,7 @@ public class CrimeListPresenterTests {
 
     @Before
     public void setup() {
-        crimesPresenter = new CrimeListPresenterImpl(crimesView, policeClient, locationProvider);
+        crimesPresenter = new CrimeListPresenterImpl(policeClient, locationProvider);
     }
 
     @Test
@@ -74,7 +74,7 @@ public class CrimeListPresenterTests {
     }
 
     @Test
-    public void shouldGetLocalCrimes() {
+    public void shouldGetLocalCrimes() throws CurrentLocationProvider.MissingPermissionException {
         crimesPresenter.onRequestLocalCrimes();
         verify(crimesView, times(1)).showProgress();
         verify(locationProvider, times(1)).requestCurrentLocation(eq(crimesPresenter));

@@ -2,6 +2,8 @@ package io.github.aoemerson.crimesmvp.model;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import io.github.aoemerson.crimesmvp.model.data.Crime;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
@@ -34,19 +36,24 @@ public class PoliceClientImpl implements PoliceClient {
         }
     }
 
-    private final Retrofit retrofit;
+    private PoliceRestClient policeRestClient;
+
 
     public PoliceClientImpl() {
-        retrofit = new Retrofit.Builder()
+        policeRestClient = new Retrofit.Builder()
                 .client(new OkHttpClient())
                 .addConverterFactory(JacksonConverterFactory.create())
                 .baseUrl("https://data.police.uk/api/")
-                .build();
+                .build().create(PoliceRestClient.class);
+    }
+
+    @Inject
+    public PoliceClientImpl(PoliceRestClient policeRestClient) {
+        this.policeRestClient = policeRestClient;
     }
 
     @Override
-    public void requestCrimesByPoint(float lat, float lng, OnCrimesLoadedListener listener) {
-        PoliceRestClient policeRestClient = retrofit.create(PoliceRestClient.class);
+    public void requestCrimesByPoint(double lat, double lng, OnCrimesLoadedListener listener) {
         policeRestClient.getCrimesByPoint(lat,lng).enqueue(new RestCallback(listener));
     }
 }

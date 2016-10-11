@@ -1,4 +1,4 @@
-package io.github.aoemerson.crimesmvp.model;
+package io.github.aoemerson.crimesmvp.model.data;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,6 +14,7 @@ import org.mockito.stubbing.Answer;
 import java.io.IOException;
 import java.util.List;
 
+import io.github.aoemerson.crimesmvp.model.PoliceClient;
 import io.github.aoemerson.crimesmvp.model.data.Crime;
 
 import static org.junit.Assert.assertEquals;

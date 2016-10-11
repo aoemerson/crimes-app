@@ -14,17 +14,20 @@ import android.widget.Toast;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import aoemeron.github.io.crimesmvp.R;
+import io.github.aoemerson.crimesmvp.application.ApplicationModule;
 import io.github.aoemerson.crimesmvp.model.data.Crime;
-import io.github.aoemerson.crimesmvp.presenter.CrimeListPresenter;
 import io.github.aoemerson.crimesmvp.presenter.CrimeListPresenterImpl;
+import io.github.aoemerson.crimesmvp.presenter.DaggerLocalCrimesComponent;
 
 public class ListCrimesActivity extends AppCompatActivity implements CrimesView {
 
     private static final int LOCATION_PERM_REQ_CODE = 1;
+    @Inject CrimeListPresenterImpl crimeListPresenter;
     private ProgressBar progressBar;
     private ListView listView;
-    private CrimeListPresenter crimeListPresenter;
     private CrimeListViewAdapter crimeListViewAdapter;
     private LocationPermissionRequestCallback locationRequestCallback;
 
@@ -37,21 +40,41 @@ public class ListCrimesActivity extends AppCompatActivity implements CrimesView 
         crimeListPresenter = new CrimeListPresenterImpl(this);
         crimeListViewAdapter = new CrimeListViewAdapter(this);
         listView.setAdapter(crimeListViewAdapter);
+        DaggerLocalCrimesComponent.builder()
+                                  .applicationModule(new ApplicationModule(getApplication()))
+                                  .build()
+                                  .inject(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        crimeListPresenter.attach(this);
+        crimeListPresenter.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        crimeListPresenter.onStop();
+        crimeListPresenter.detach();
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        crimeListPresenter.onRequestCrimes(52.629729f, -1.131592f);
+        crimeListPresenter.onRequestLocalCrimes();
+
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == LOCATION_PERM_REQ_CODE && locationRequestCallback != null) {
-            boolean granted = true;
+            boolean granted = false;
             for (int result : grantResults) {
-                granted = granted && (result == PackageManager.PERMISSION_GRANTED);
+                granted = granted || (result == PackageManager.PERMISSION_GRANTED);
             }
             if (granted)
                 locationRequestCallback.onLocationPermissionGranted();
@@ -78,9 +101,7 @@ public class ListCrimesActivity extends AppCompatActivity implements CrimesView 
 
     @Override
     public void requestLocationPermission(LocationPermissionRequestCallback callback) {
-        if (ActivityCompat
-                .checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat
-                .checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (!hasLocationPersmission()) {
             locationRequestCallback = callback;
             ActivityCompat.requestPermissions(this,
                     new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_PERM_REQ_CODE);
@@ -97,7 +118,29 @@ public class ListCrimesActivity extends AppCompatActivity implements CrimesView 
     }
 
     @Override
-    public void showError(@StringRes int errResId) {
+    public void showCrimesLoadingError() {
+        showError(R.string.err_could_not_load_crimes);
+    }
+
+    @Override
+    public void showLocationPermissionDeniedError() {
+        showError(R.string.err_location_permission_denied);
+    }
+
+    @Override
+    public void showLocationUnavailableError() {
+        showError(R.string.err_location_not_obtained);
+    }
+
+    @Override
+    public boolean hasLocationPersmission() {
+        return ActivityCompat
+                .checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat
+                .checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void showError(@StringRes int errResId) {
         Toast.makeText(this, getString(errResId), Toast.LENGTH_SHORT).show();
     }
+
 }

@@ -2,22 +2,23 @@ package io.github.aoemerson.crimesmvp.application;
 
 import android.app.Application;
 
+import aoemeron.github.io.crimesmvp.BuildConfig;
+import timber.log.Timber;
+
 /**
  * Created by Andrew on 26/08/2016.
  */
 public class CrimeApp extends Application {
 
-    private ApplicationComponent applicationComponent;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        applicationComponent = DaggerApplicationComponent.builder()
-                                                         .appModule(new AppModule(this))
-                                                         .build();
+        if (BuildConfig.DEBUG) {
+            Timber.plant(new Timber.DebugTree());
+        }
+
     }
 
-    public ApplicationComponent getApplicationComponent() {
-        return applicationComponent;
-    }
+
 }

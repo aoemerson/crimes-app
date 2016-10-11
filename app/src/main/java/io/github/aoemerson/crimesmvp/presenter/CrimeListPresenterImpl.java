@@ -2,27 +2,31 @@ package io.github.aoemerson.crimesmvp.presenter;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import aoemeron.github.io.crimesmvp.R;
-import io.github.aoemerson.crimesmvp.model.data.Crime;
-import io.github.aoemerson.crimesmvp.model.location.CurrentLocationProvider;
 import io.github.aoemerson.crimesmvp.model.PoliceClient;
 import io.github.aoemerson.crimesmvp.model.PoliceClientImpl;
+import io.github.aoemerson.crimesmvp.model.data.Crime;
+import io.github.aoemerson.crimesmvp.model.location.CurrentLocationProvider;
 import io.github.aoemerson.crimesmvp.model.location.GoogleFusedLocationProvider;
 import io.github.aoemerson.crimesmvp.view.CrimesView;
 
+
 public class CrimeListPresenterImpl implements CrimeListPresenter, PoliceClient.OnCrimesLoadedListener, CurrentLocationProvider.LocationRequestCallback, CrimesView.LocationPermissionRequestCallback {
 
-    final CrimesView crimesView;
     final PoliceClient policeClient;
+    CrimesView crimesView;
     private CurrentLocationProvider locationProvider;
+    private boolean askedForLocationPermission;
 
     public CrimeListPresenterImpl(CrimesView crimesView) {
         this.crimesView = crimesView;
         this.policeClient = new PoliceClientImpl();
     }
 
-    CrimeListPresenterImpl(CrimesView crimesView, PoliceClient policeClient, CurrentLocationProvider locationProvider) {
-        this.crimesView = crimesView;
+    @Inject
+    CrimeListPresenterImpl(PoliceClient policeClient, CurrentLocationProvider locationProvider) {
         this.policeClient = policeClient;
         this.locationProvider = locationProvider;
     }
@@ -44,6 +48,26 @@ public class CrimeListPresenterImpl implements CrimeListPresenter, PoliceClient.
     }
 
     @Override
+    public void onStart() {
+        locationProvider.connect();
+    }
+
+    @Override
+    public void onStop() {
+        locationProvider.disconnect();
+    }
+
+    @Override
+    public void attach(CrimesView view) {
+        this.crimesView = view;
+    }
+
+    @Override
+    public void detach() {
+        crimesView = null;
+    }
+
+    @Override
     public void onCrimesLoadComplete(List<Crime> crimes) {
         if (crimesView != null) {
             crimesView.setCrimes(crimes);
@@ -53,9 +77,8 @@ public class CrimeListPresenterImpl implements CrimeListPresenter, PoliceClient.
 
     @Override
     public void onCrimesLoadError(Throwable t) {
-        crimesView.showError(R.string.err_could_not_load_crimes);
+        crimesView.showCrimesLoadingError();
     }
-
 
 
     @Override
@@ -65,7 +88,16 @@ public class CrimeListPresenterImpl implements CrimeListPresenter, PoliceClient.
 
     @Override
     public void onLocationRequestError(Throwable e) {
-        crimesView.showError(R.string.err_location_not_obtained);
+        if (!askedForLocationPermission && !crimesView.hasLocationPersmission()) {
+            crimesView.requestLocationPermission(this);
+            askedForLocationPermission = true;
+        } else if (!crimesView.hasLocationPersmission()) {
+            crimesView.showLocationPermissionDeniedError();
+            locationProvider.requestDefaultLocation(this);
+        } else {
+            crimesView.showLocationUnavailableError();
+            locationProvider.requestDefaultLocation(this);
+        }
     }
 
     @Override
@@ -75,6 +107,6 @@ public class CrimeListPresenterImpl implements CrimeListPresenter, PoliceClient.
 
     @Override
     public void onLocationPermissionDenied() {
-        crimesView.showError(R.string.err_location_permission_denied);
+        crimesView.showLocationPermissionDeniedError();
     }
 }
