@@ -4,26 +4,19 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import aoemeron.github.io.crimesmvp.R;
 import io.github.aoemerson.crimesmvp.model.PoliceClient;
-import io.github.aoemerson.crimesmvp.model.PoliceClientImpl;
 import io.github.aoemerson.crimesmvp.model.data.Crime;
 import io.github.aoemerson.crimesmvp.model.location.CurrentLocationProvider;
 import io.github.aoemerson.crimesmvp.model.location.GoogleFusedLocationProvider;
 import io.github.aoemerson.crimesmvp.view.CrimesView;
 
 
-public class CrimeListPresenterImpl implements CrimeListPresenter, PoliceClient.OnCrimesLoadedListener, CurrentLocationProvider.LocationRequestCallback, CrimesView.LocationPermissionRequestCallback {
+public class CrimeListPresenterImpl implements CrimeListPresenter {
 
     final PoliceClient policeClient;
     CrimesView crimesView;
     private CurrentLocationProvider locationProvider;
     private boolean askedForLocationPermission;
-
-    public CrimeListPresenterImpl(CrimesView crimesView) {
-        this.crimesView = crimesView;
-        this.policeClient = new PoliceClientImpl();
-    }
 
     @Inject
     CrimeListPresenterImpl(PoliceClient policeClient, CurrentLocationProvider locationProvider) {
@@ -32,7 +25,7 @@ public class CrimeListPresenterImpl implements CrimeListPresenter, PoliceClient.
     }
 
     @Override
-    public void onRequestCrimes(float latitude, float longitude) {
+    public void onRequestCrimes(double latitude, double longitude) {
         crimesView.showProgress();
         policeClient.requestCrimesByPoint(latitude, longitude, this);
     }
@@ -70,13 +63,18 @@ public class CrimeListPresenterImpl implements CrimeListPresenter, PoliceClient.
     @Override
     public void onCrimesLoadComplete(List<Crime> crimes) {
         if (crimesView != null) {
-            crimesView.setCrimes(crimes);
+            if (crimes != null && crimes.size() > 0) {
+                crimesView.setCrimes(crimes);
+            } else {
+                crimesView.showNoCrimesMessage();
+            }
             crimesView.hideProgress();
         }
     }
 
     @Override
     public void onCrimesLoadError(Throwable t) {
+        crimesView.hideProgress();
         crimesView.showCrimesLoadingError();
     }
 
@@ -108,5 +106,6 @@ public class CrimeListPresenterImpl implements CrimeListPresenter, PoliceClient.
     @Override
     public void onLocationPermissionDenied() {
         crimesView.showLocationPermissionDeniedError();
+        locationProvider.requestDefaultLocation(this);
     }
 }
