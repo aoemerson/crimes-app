@@ -1,7 +1,5 @@
 package io.github.aoemerson.crimesmvp.view;
 
-import android.support.annotation.StringRes;
-
 import java.util.List;
 
 import io.github.aoemerson.crimesmvp.model.data.Crime;
@@ -14,6 +12,8 @@ public interface CrimesView {
     }
 
     void setCrimes(List<Crime> crimes);
+
+    void showNoCrimesMessage();
     void showProgress();
     void hideProgress();
     void requestLocationPermission(LocationPermissionRequestCallback callback);

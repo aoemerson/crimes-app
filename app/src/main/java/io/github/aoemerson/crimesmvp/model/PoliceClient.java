@@ -10,6 +10,15 @@ public interface PoliceClient {
         void onCrimesLoadComplete(List<Crime> crimes);
         void onCrimesLoadError(Throwable t);
 
+        void onServerError(String reason);
+
+        void onOtherError(String reason);
+
+        void onUserError(String reason);
+
+        void onTooManyRequests();
+
+        void onReadTimeOut(Throwable cause);
     }
 
     void requestCrimesByPoint(double lat, double lng, OnCrimesLoadedListener listener);

@@ -37,7 +37,6 @@ public class ListCrimesActivity extends AppCompatActivity implements CrimesView 
         setContentView(R.layout.activity_list_crimes);
         progressBar = (ProgressBar) findViewById(R.id.progress);
         listView = (ListView) findViewById(R.id.list);
-        crimeListPresenter = new CrimeListPresenterImpl(this);
         crimeListViewAdapter = new CrimeListViewAdapter(this);
         listView.setAdapter(crimeListViewAdapter);
         DaggerLocalCrimesComponent.builder()
@@ -87,6 +86,11 @@ public class ListCrimesActivity extends AppCompatActivity implements CrimesView 
     public void setCrimes(List<Crime> crimes) {
         crimeListViewAdapter.addAll(crimes);
         crimeListViewAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void showNoCrimesMessage() {
+        showError(R.string.msg_no_crimes_here);
     }
 
     @Override

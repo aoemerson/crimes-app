@@ -1,13 +1,12 @@
 package io.github.aoemerson.crimesmvp.presenter;
 
+import io.github.aoemerson.crimesmvp.model.PoliceClient;
+import io.github.aoemerson.crimesmvp.model.location.CurrentLocationProvider;
 import io.github.aoemerson.crimesmvp.view.CrimesView;
 
-/**
- * Created by Andrew on 17/08/2016.
- */
-public interface CrimeListPresenter {
+public interface CrimeListPresenter extends PoliceClient.OnCrimesLoadedListener, CurrentLocationProvider.LocationRequestCallback, CrimesView.LocationPermissionRequestCallback {
 
-    void onRequestCrimes(float latitude, float longitude);
+    void onRequestCrimes(double latitude, double longitude);
     void onRequestLocalCrimes();
     void onStart();
     void onStop();
