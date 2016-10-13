@@ -7,10 +7,9 @@ import android.support.annotation.Nullable;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.FusedLocationProviderApi;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import timber.log.Timber;
@@ -22,11 +21,13 @@ public class GoogleFusedLocationProvider implements CurrentLocationProvider, Goo
     private final double defaultLng;
     private GoogleApiClient googleApiClient;
     private Runnable runOnConnected;
+    private FusedLocationProviderApi fusedLocationApi;
 
     @Inject
-    public GoogleFusedLocationProvider(GoogleApiClient apiClient, double defaultLat, double defaultLng) {
+    public GoogleFusedLocationProvider(GoogleApiClient apiClient, FusedLocationProviderApi fusedLocationApi, double defaultLat, double defaultLng) {
         this.defaultLat = defaultLat;
         this.defaultLng = defaultLng;
+        this.fusedLocationApi = fusedLocationApi;
         if (apiClient == null) {
             throw new IllegalArgumentException("Google API client has not been initialised - null reference");
         }
@@ -41,7 +42,7 @@ public class GoogleFusedLocationProvider implements CurrentLocationProvider, Goo
             postponeLocationRequest(callback);
         } else {
             try {
-                Location lastLocation = LocationServices.FusedLocationApi
+                Location lastLocation = fusedLocationApi
                         .getLastLocation(googleApiClient);
                 callback.onLocationObtained(lastLocation.getLatitude(), lastLocation
                         .getLongitude());
@@ -71,7 +72,7 @@ public class GoogleFusedLocationProvider implements CurrentLocationProvider, Goo
         callback.onLocationObtained(defaultLat, defaultLng);
     }
 
-    private void postponeLocationRequest(final LocationRequestCallback callback) {
+    void postponeLocationRequest(final LocationRequestCallback callback) {
         runOnConnected = new Runnable() {
             @Override
             public void run() {

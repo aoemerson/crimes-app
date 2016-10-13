@@ -166,8 +166,13 @@ public class CrimeListPresenterTests {
     @Test
     public void shouldShowErrorOnCrimeLoadIssue() {
         crimesPresenter.onCrimesLoadError(mock(Throwable.class));
-        verify(crimesView, once()).hideProgress();
-        verify(crimesView, once()).showCrimesLoadingError();
+        crimesPresenter.onServerError("");
+        crimesPresenter.onOtherError("");
+        crimesPresenter.onUserError("");
+        crimesPresenter.onTooManyRequests();
+        crimesPresenter.onReadTimeOut(new Exception());
+        verify(crimesView, times(6)).hideProgress();
+        verify(crimesView, times(6)).showCrimesLoadingError();
     }
 
     /*
@@ -202,7 +207,6 @@ public class CrimeListPresenterTests {
         crimesPresenter.onRequestLocalCrimes();
         verify(crimesView, once()).showProgress();
         verify(locationProvider, once()).requestCurrentLocation(eq(crimesPresenter));
-//        verify(policeClient,times(1)).requestCrimesByPoint(anyFloat(), anyFloat(), any(PoliceClient.OnCrimesLoadedListener.class));
     }
 
 

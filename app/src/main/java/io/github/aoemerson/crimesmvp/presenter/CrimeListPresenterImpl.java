@@ -74,9 +74,39 @@ public class CrimeListPresenterImpl implements CrimeListPresenter {
 
     @Override
     public void onCrimesLoadError(Throwable t) {
+        updateViewOnError();
+    }
+
+    private void updateViewOnError() {
         crimesView.hideProgress();
         crimesView.showCrimesLoadingError();
     }
+
+    @Override
+    public void onServerError(String reason) {
+        updateViewOnError();
+    }
+
+    @Override
+    public void onOtherError(String reason) {
+        updateViewOnError();
+    }
+
+    @Override
+    public void onUserError(String reason) {
+        updateViewOnError();
+    }
+
+    @Override
+    public void onTooManyRequests() {
+        updateViewOnError();
+    }
+
+    @Override
+    public void onReadTimeOut(Throwable cause) {
+        updateViewOnError();
+    }
+
 
 
     @Override

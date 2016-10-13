@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.TypedValue;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationServices;
 
 import javax.inject.Named;
@@ -25,16 +26,16 @@ public class CurrentLocationProviderModule {
 
     @Provides
     @Singleton
-    CurrentLocationProvider providesCurrentLocationProvider(GoogleApiClient apiClient, @Named("lat") double defaultLat,  @Named("lng") double defaultLng) {
-        return new GoogleFusedLocationProvider(apiClient, defaultLat, defaultLng);
+    CurrentLocationProvider providesCurrentLocationProvider(GoogleApiClient apiClient, FusedLocationProviderApi fusedLocationProviderApi, @Named("lat") double defaultLat, @Named("lng") double defaultLng) {
+        return new GoogleFusedLocationProvider(apiClient, fusedLocationProviderApi, defaultLat, defaultLng);
     }
 
     @Provides
     @Named("lat")
     Double providesDefaultLattitude(Context context) {
         TypedValue outValue = new TypedValue();
-        context.getResources().getValue(R.dimen.default_latitude, outValue,true);
-        return  (double) outValue.getFloat();
+        context.getResources().getValue(R.dimen.default_latitude, outValue, true);
+        return (double) outValue.getFloat();
     }
 
     @Provides
@@ -43,6 +44,12 @@ public class CurrentLocationProviderModule {
         TypedValue outValue = new TypedValue();
         context.getResources().getValue(R.dimen.default_longitude, outValue, true);
         return (double) outValue.getFloat();
+    }
+
+    @Provides
+    @Singleton
+    FusedLocationProviderApi providesFusedLocationApi() {
+        return LocationServices.FusedLocationApi;
     }
 
     @Provides

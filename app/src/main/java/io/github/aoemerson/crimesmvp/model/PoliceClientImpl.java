@@ -1,5 +1,9 @@
 package io.github.aoemerson.crimesmvp.model;
 
+import android.support.annotation.NonNull;
+
+import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -27,13 +31,68 @@ public class PoliceClientImpl implements PoliceClient {
 
         @Override
         public void onResponse(Call<List<Crime>> call, Response<List<Crime>> response) {
-            listener.onCrimesLoadComplete(response.body());
+            if (response.isSuccessful()) {
+                listener.onCrimesLoadComplete(response.body());
+            } else {
+                int code = response.code();
+                if (code >= 400 && code < 500) {
+                    if (code == 429) {
+                        listener.onTooManyRequests();
+                    } else {
+                        handleUserError(response);
+                    }
+                } else if (code >= 500 && code < 600) {
+                    handleServerError(response);
+                } else {
+                    handleOtherError(response);
+                }
+            }
         }
 
         @Override
         public void onFailure(Call<List<Crime>> call, Throwable t) {
-            listener.onCrimesLoadError(t);
+            if (t instanceof SocketTimeoutException) {
+                listener.onReadTimeOut(t);
+            } else {
+                listener.onCrimesLoadError(t);
+            }
         }
+
+        private void handleOtherError(Response<List<Crime>> response) {
+            try {
+                listener.onOtherError(getReason(response));
+            } catch (IOException e) {
+                listener.onOtherError(getAltReason(response));
+            }
+        }
+
+        private void handleUserError(Response<List<Crime>> response) {
+            try {
+                listener.onUserError(getReason(response));
+            } catch (IOException e) {
+                listener.onUserError(getAltReason(response));
+            }
+        }
+
+        @NonNull
+        private String getAltReason(Response<List<Crime>> response) {
+            return response.code() + ": <could not read server error response body>";
+        }
+
+        @NonNull
+        private String getReason(Response<List<Crime>> response) throws IOException {
+            return response.code() + ": " + response.errorBody().string();
+        }
+
+        private void handleServerError(Response<List<Crime>> response) {
+            try {
+                listener.onServerError(getReason(response));
+            } catch (IOException e) {
+                listener.onServerError(getAltReason(response));
+            }
+        }
+
+
     }
 
     private PoliceRestClient policeRestClient;
