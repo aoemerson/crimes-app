@@ -111,6 +111,7 @@ public class CrimeListPresenterImpl implements CrimeListPresenter {
 
     @Override
     public void onLocationObtained(double lat, double lng) {
+        crimesView.showCurrentLocation(lat, lng);
         policeClient.requestCrimesByPoint(lat, lng, this);
     }
 

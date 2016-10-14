@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
@@ -50,45 +51,48 @@ public class CrimesModelTests {
         return crimes;
     }
 
-//    @Test
-//    public void canDeserialisePoliceJsonWithCallback() {
-//        policeClient.requestCrimesByPoint(52.629729f, -1.131592f, new PoliceClient.OnCrimesLoadedListener() {
-//            @Override
-//            public void onCrimesLoadComplete(List<Crime> crimes) {
-//                checkTest1Crimes(crimes);
-//            }
-//
-//            @Override
-//            public void onCrimesLoadError(Throwable t) {
-//
-//            }
-//
-//            @Override
-//            public void onServerError(String reason) {
-//
-//            }
-//
-//            @Override
-//            public void onOtherError(String reason) {
-//
-//            }
-//
-//            @Override
-//            public void onUserError(String reason) {
-//
-//            }
-//
-//            @Override
-//            public void onTooManyRequests() {
-//
-//            }
-//
-//            @Override
-//            public void onReadTimeOut() {
-//
-//            }
-//        });
-//    }
+    @Test
+    public void canDeserialisePoliceJsonWithCallback() {
+        policeClient
+                .requestCrimesByPoint(52.629729f, -1.131592f, new PoliceClient.OnCrimesLoadedListener() {
+                    @Override
+                    public void onCrimesLoadComplete(List<Crime> crimes) {
+                        checkTest1Crimes(crimes);
+                    }
+
+                    @Override
+                    public void onCrimesLoadError(Throwable t) {
+
+                    }
+
+                    @Override
+                    public void onServerError(String reason) {
+
+                    }
+
+                    @Override
+                    public void onOtherError(String reason) {
+
+                    }
+
+                    @Override
+                    public void onUserError(String reason) {
+
+                    }
+
+                    @Override
+                    public void onTooManyRequests() {
+
+                    }
+
+                    @Override
+                    public void onReadTimeOut(Throwable cause) {
+
+                    }
+
+
+                });
+    }
 
     private void checkTest1Crimes(List<Crime> crimesByPoint) {
         Crime crime1 = crimesByPoint.get(0);

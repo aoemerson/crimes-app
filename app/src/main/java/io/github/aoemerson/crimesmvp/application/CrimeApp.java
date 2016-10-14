@@ -2,7 +2,7 @@ package io.github.aoemerson.crimesmvp.application;
 
 import android.app.Application;
 
-import aoemeron.github.io.crimesmvp.BuildConfig;
+import aoemerson.github.io.crimesmvp.BuildConfig;
 import timber.log.Timber;
 
 /**

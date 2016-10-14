@@ -11,7 +11,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import aoemeron.github.io.crimesmvp.R;
+import aoemerson.github.io.crimesmvp.R;
 import io.github.aoemerson.crimesmvp.application.ApplicationModule;
 import io.github.aoemerson.crimesmvp.model.data.Crime;
 import io.github.aoemerson.crimesmvp.presenter.CrimeListPresenterImpl;
@@ -99,6 +99,11 @@ public class ListCrimesActivity extends BaseActivity {
     @Override
     public void showLocationUnavailableError() {
         showError(R.string.err_location_not_obtained);
+    }
+
+    @Override
+    public void showCurrentLocation(double lat, double lng) {
+
     }
 
     private void showError(@StringRes int errResId) {

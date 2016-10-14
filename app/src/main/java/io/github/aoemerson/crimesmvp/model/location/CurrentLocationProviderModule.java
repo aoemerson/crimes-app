@@ -10,7 +10,7 @@ import com.google.android.gms.location.LocationServices;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import aoemeron.github.io.crimesmvp.R;
+import aoemerson.github.io.crimesmvp.R;
 import dagger.Module;
 import dagger.Provides;
 

@@ -22,4 +22,6 @@ public interface CrimesView {
     void showLocationPermissionDeniedError();
     void showLocationUnavailableError();
     boolean hasLocationPersmission();
+
+    void showCurrentLocation(double lat, double lng);
 }

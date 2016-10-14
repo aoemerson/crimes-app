@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import aoemeron.github.io.crimesmvp.R;
+import aoemerson.github.io.crimesmvp.R;
 import io.github.aoemerson.crimesmvp.model.data.Crime;
 
 /**

@@ -99,11 +99,12 @@ public class CrimeListPresenterTests {
 
     @Test
     public void shouldRequestCrimesOnLocationObtained() {
-        float lat = 23f;
-        float lng = 65f;
+        double lat = 23d;
+        double lng = 65d;
         crimesPresenter.onLocationObtained(lat, lng);
         verify(policeClient, once())
-                .requestCrimesByPoint(eq(((double) lat)), eq(((double) lng)), eq(crimesPresenter));
+                .requestCrimesByPoint(lat, lng, crimesPresenter);
+        verify(crimesView, once()).showCurrentLocation(lat, lng);
     }
 
     @Test

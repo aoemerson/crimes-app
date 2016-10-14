@@ -7,4 +7,5 @@
     </string>
     <string name="err_could_not_load_crimes">Unable to load crimes - try again later.</string>
     <string name="msg_no_crimes_here">No crimes reported in this area.</string>
+    <string name="title_activity_maps">Map</string>
 </resources>

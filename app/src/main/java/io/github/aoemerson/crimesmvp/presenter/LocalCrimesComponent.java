@@ -1,12 +1,11 @@
 package io.github.aoemerson.crimesmvp.presenter;
 
-import java.util.List;
-
 import javax.inject.Singleton;
 
 import dagger.Component;
 import io.github.aoemerson.crimesmvp.application.ApplicationModule;
 import io.github.aoemerson.crimesmvp.model.location.CurrentLocationProviderModule;
+import io.github.aoemerson.crimesmvp.view.CrimesMapActivity;
 import io.github.aoemerson.crimesmvp.view.ListCrimesActivity;
 
 
@@ -15,4 +14,6 @@ import io.github.aoemerson.crimesmvp.view.ListCrimesActivity;
 public interface LocalCrimesComponent {
 
     void inject(ListCrimesActivity activity);
+
+    void inject(CrimesMapActivity activity);
 }

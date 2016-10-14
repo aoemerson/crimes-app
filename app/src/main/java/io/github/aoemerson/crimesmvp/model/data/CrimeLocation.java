@@ -9,25 +9,25 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CrimeLocation {
 
-    private float latitude;
-    private float longitude;
+    private double latitude;
+    private double longitude;
     private CrimeStreet street;
 
     public CrimeLocation() {
     }
 
-    CrimeLocation(float lat, float lng, String street, int streetId) {
+    CrimeLocation(double lat, double lng, String street, int streetId) {
         this.latitude = lat;
         this.longitude = lng;
         this.street = new CrimeStreet(streetId, street);
 
     }
 
-    public float getLongitude() {
+    public double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(float longitude) {
+    public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
 
@@ -39,21 +39,9 @@ public class CrimeLocation {
         this.street = street;
     }
 
-    public float getLatitude() {
+    public double getLatitude() {
 
         return latitude;
-    }
-
-    public void setLatitude(float latitude) {
-        this.latitude = latitude;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = (latitude != +0.0f ? Float.floatToIntBits(latitude) : 0);
-        result = 31 * result + (longitude != +0.0f ? Float.floatToIntBits(longitude) : 0);
-        result = 31 * result + (street != null ? street.hashCode() : 0);
-        return result;
     }
 
     @Override
@@ -63,10 +51,26 @@ public class CrimeLocation {
 
         CrimeLocation that = (CrimeLocation) o;
 
-        if (latitude != that.latitude) return false;
-        if (longitude != that.longitude) return false;
+        if (Double.compare(that.latitude, latitude) != 0) return false;
+        if (Double.compare(that.longitude, longitude) != 0) return false;
         return street != null ? street.equals(that.street) : that.street == null;
 
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        temp = Double.doubleToLongBits(latitude);
+        result = (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(longitude);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + (street != null ? street.hashCode() : 0);
+        return result;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 
     @Override
