@@ -8,7 +8,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
@@ -16,6 +15,7 @@ import org.mockito.stubbing.Answer;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -24,6 +24,8 @@ import io.github.aoemerson.crimesmvp.util.FileUtils;
 import okhttp3.OkHttpClient;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
+import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
@@ -31,9 +33,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.anyListOf;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PoliceClientTests {
@@ -79,9 +84,9 @@ public class PoliceClientTests {
         };
 
         doAnswer(answer).when(crimesLoadedListener)
-                        .onCrimesLoadComplete(Mockito.anyListOf(Crime.class));
+                        .onCrimesLoadComplete(anyListOf(Crime.class));
         doAnswer(answer).when(crimesLoadedListener)
-                        .onCrimesLoadError(Mockito.any(Throwable.class));
+                        .onCrimesLoadError(any(Throwable.class));
         doAnswer(answer).when(crimesLoadedListener).onServerError(anyString());
         doAnswer(answer).when(crimesLoadedListener).onOtherError(anyString());
         doAnswer(answer).when(crimesLoadedListener).onUserError(anyString());
@@ -106,8 +111,8 @@ public class PoliceClientTests {
         countDownLatch.await();
 
         ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
-        Mockito.verify(crimesLoadedListener, Mockito.times(1))
-               .onCrimesLoadComplete(captor.capture());
+        verify(crimesLoadedListener, times(1))
+                .onCrimesLoadComplete(captor.capture());
         assertThat(captor.getValue().size(), CoreMatchers.is(2));
     }
 
@@ -121,8 +126,8 @@ public class PoliceClientTests {
 
         policeClient.requestCrimesByPoint(55d, 0d, crimesLoadedListener);
         countDownLatch.await();
-        Mockito.verify(crimesLoadedListener, Mockito.times(1))
-               .onServerError(Matchers.eq("500: " + errMsg));
+        verify(crimesLoadedListener, times(1))
+                .onServerError(Matchers.eq("500: " + errMsg));
     }
 
     @Test
@@ -134,8 +139,8 @@ public class PoliceClientTests {
 
         policeClient.requestCrimesByPoint(55d, 0d, crimesLoadedListener);
         countDownLatch.await();
-        Mockito.verify(crimesLoadedListener, Mockito.times(1))
-               .onUserError(Matchers.eq("404: " + errMsg));
+        verify(crimesLoadedListener, times(1))
+                .onUserError(Matchers.eq("404: " + errMsg));
     }
 
     @Test
@@ -147,7 +152,7 @@ public class PoliceClientTests {
 
         policeClient.requestCrimesByPoint(55d, 0d, crimesLoadedListener);
         countDownLatch.await();
-        Mockito.verify(crimesLoadedListener, Mockito.times(1)).onTooManyRequests();
+        verify(crimesLoadedListener, times(1)).onTooManyRequests();
     }
 
     @Test
@@ -166,8 +171,8 @@ public class PoliceClientTests {
         countDownLatch.await();
 
         ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
-        Mockito.verify(crimesLoadedListener, Mockito.times(1))
-               .onCrimesLoadComplete(captor.capture());
+        verify(crimesLoadedListener, times(1))
+                .onCrimesLoadComplete(captor.capture());
         assertThat(captor.getValue().size(), CoreMatchers.is(2));
     }
 
@@ -215,6 +220,47 @@ public class PoliceClientTests {
         policeClient.requestCrimesByPoint(55d, 0d, crimesLoadedListener);
         countDownLatch.await();
         verify(crimesLoadedListener, times(1)).onReadTimeOut(any(SocketTimeoutException.class));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked") // warning is for a mock anyway
+    public void shouldRequestCrimeBounds() {
+        PoliceRestClient restClient = mock(PoliceRestClient.class);
+        when(restClient
+                .getCrimesByRectangle(any(PoliceRestClient.RectangleBounds.class)))
+                .thenReturn(mock(Call.class));
+        PoliceClientImpl client = new PoliceClientImpl(restClient);
+        double southWestLat = 0d;
+        double southWestLng = 1d;
+        double northEastLat = 52d;
+        double northEastLng = 53d;
+        client.requestCrimesByRectangularBounds(southWestLat, southWestLng, northEastLat,
+                northEastLng, mock(PoliceClient.OnCrimesLoadedListener.class));
+        verify(restClient)
+                .getCrimesByRectangle(new PoliceRestClient.RectangleBounds(southWestLat, southWestLng, northEastLat, northEastLng));
+
+    }
+
+    @Test
+    public void formatCrimeApiLinkCorrectly() throws Exception {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("content-type", "application/json")
+                .setBody(FileUtils.loadResourceAsString("test1Crimes.json")));
+        double southWestLat = 0d;
+        double southWestLng = 1d;
+        double northEastLat = 52d;
+        double northEastLng = 53d;
+        policeClient.requestCrimesByRectangularBounds(southWestLat, southWestLng, northEastLat,
+                northEastLng, crimesLoadedListener);
+        countDownLatch.await();
+        RecordedRequest recordedRequest = mockWebServer.takeRequest();
+        assertThat(recordedRequest.getPath(), CoreMatchers.is(String
+                .format(Locale.UK,
+                        "/crimes-street/all-crime?poly=%f,%f:%f,%f:%f,%f:%f,%f",
+                        southWestLat, southWestLng, northEastLat, southWestLng,
+                        northEastLat, northEastLng, southWestLat, northEastLng)));
+
     }
 
 

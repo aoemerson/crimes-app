@@ -6,8 +6,7 @@ import io.github.aoemerson.crimesmvp.view.CrimesView;
 
 public interface CrimeListPresenter extends PoliceClient.OnCrimesLoadedListener, CurrentLocationProvider.LocationRequestCallback, CrimesView.LocationPermissionRequestCallback {
 
-    void onRequestCrimes(double latitude, double longitude);
-    void onRequestLocalCrimes();
+    void mapBoundsChanged(double southEastLat, double southEastLng, double northEastLat, double northEastLng);
     void onStart();
     void onStop();
     void attach(CrimesView view);

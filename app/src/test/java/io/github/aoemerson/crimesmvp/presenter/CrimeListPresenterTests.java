@@ -1,15 +1,11 @@
 package io.github.aoemerson.crimesmvp.presenter;
 
-import android.support.annotation.NonNull;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.verification.VerificationMode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,9 +19,7 @@ import io.github.aoemerson.crimesmvp.view.CrimesView;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -66,82 +60,91 @@ public class CrimeListPresenterTests {
     }
 
     @Test
-    public void shouldConnectLocationProviderOnStart() throws CurrentLocationProvider.MissingPermissionException {
+    public void shouldRequestLocationOnStart() throws CurrentLocationProvider.MissingPermissionException {
         crimesPresenter.onStart();
-        verify(locationProvider, once()).connect();
-    }
-
-    @NonNull
-    private VerificationMode once() {
-        return times(1);
+        verify(locationProvider).connect();
+        verify(locationProvider).requestCurrentLocation(crimesPresenter);
     }
 
     @Test
     public void shouldDisconnectLocationProviderOnStop() {
         crimesPresenter.onStop();
-        verify(locationProvider, once()).disconnect();
-    }
-
-    @Test
-    public void onRequestLocalCrimesShouldFineLocation() throws CurrentLocationProvider.MissingPermissionException {
-        crimesPresenter.onRequestLocalCrimes();
-        verify(crimesView, once()).showProgress();
-        verify(locationProvider, once()).requestCurrentLocation(eq(crimesPresenter));
+        verify(locationProvider).disconnect();
     }
 
     @Test
     public void shouldRequestLocationPermissionOnMissing() throws CurrentLocationProvider.MissingPermissionException {
         doThrow(CurrentLocationProvider.MissingPermissionException.class)
                 .when(locationProvider).requestCurrentLocation(crimesPresenter);
-        crimesPresenter.onRequestLocalCrimes();
-        verify(crimesView, once()).requestLocationPermission(crimesPresenter);
+        crimesPresenter.onStart();
+        verify(crimesView).requestLocationPermission(crimesPresenter);
     }
 
     @Test
-    public void shouldRequestCrimesOnLocationObtained() {
+    public void shouldShowTheLocationWhenObtained() {
         double lat = 23d;
         double lng = 65d;
         crimesPresenter.onLocationObtained(lat, lng);
-        verify(policeClient, once())
-                .requestCrimesByPoint(lat, lng, crimesPresenter);
-        verify(crimesView, once()).showCurrentLocation(lat, lng);
+        verify(crimesView).showCurrentLocation(lat, lng);
+        Mockito.verifyZeroInteractions(policeClient);
+    }
+
+    @Test
+    public void shouldRequestCrimesOnMapBoundsChange() {
+        int southEastLat = 55;
+        int southEastLng = 0;
+        double northEastLat = 55.3;
+        double northEastLng = 0.5;
+        crimesPresenter.mapBoundsChanged(southEastLat, southEastLng, northEastLat, northEastLng);
+        verify(policeClient)
+                .requestCrimesByRectangularBounds(southEastLat, southEastLng, northEastLat, northEastLng, crimesPresenter);
+        verify(crimesView).showProgress();
     }
 
     @Test
     public void shouldHanldeLocationPermissionDeniedError() {
         shouldHandlePermissionDeniedOnFirstRequestError();
         crimesPresenter.onLocationRequestError(Mockito.mock(Throwable.class));
-        verify(crimesView, once()).showLocationPermissionDeniedError();
-        verify(locationProvider, once()).requestDefaultLocation(eq(crimesPresenter));
+        verify(crimesView).showLocationPermissionDeniedError();
+        verify(locationProvider).requestDefaultLocation(eq(crimesPresenter));
     }
 
     @Test
     public void shouldHandlePermissionDeniedOnFirstRequestError() {
         when(crimesView.hasLocationPersmission()).thenReturn(false);
         crimesPresenter.onLocationRequestError(Mockito.mock(Throwable.class));
-        verify(crimesView, once()).requestLocationPermission(eq(crimesPresenter));
+        verify(crimesView).requestLocationPermission(eq(crimesPresenter));
     }
 
     @Test
     public void shouldShowLocationUnavailable() {
         when(crimesView.hasLocationPersmission()).thenReturn(true);
         crimesPresenter.onLocationRequestError(Mockito.mock(Throwable.class));
-        verify(crimesView, once()).showLocationUnavailableError();
-        verify(locationProvider, once()).requestDefaultLocation(eq(crimesPresenter));
+        verify(crimesView).showLocationUnavailableError();
+        verify(locationProvider).requestDefaultLocation(eq(crimesPresenter));
     }
 
     @Test
-    public void shouldRequestLocalCrimesOnLocationPermissionGranted() throws CurrentLocationProvider.MissingPermissionException {
+    public void shouldRequestCurrentLocationOnLocationPermissionGranted() throws CurrentLocationProvider.MissingPermissionException {
         crimesPresenter.onLocationPermissionGranted();
-        verify(crimesView, once()).showProgress();
-        verify(locationProvider, once()).requestCurrentLocation(eq(crimesPresenter));
+        verify(locationProvider).requestCurrentLocation(eq(crimesPresenter));
+    }
+
+    @Test
+    public void shouldRequestDefaultLocationOnLocationPermissionGrantedSecurityException() throws CurrentLocationProvider.MissingPermissionException {
+//        when(locationProvider.requestCurrentLocation(crimesPresenter)).thenThrow()
+        doThrow(CurrentLocationProvider.MissingPermissionException.class).when(locationProvider)
+                                                                         .requestCurrentLocation(crimesPresenter);
+        crimesPresenter.onLocationPermissionGranted();
+        verify(locationProvider).requestCurrentLocation(crimesPresenter);
+        verify(locationProvider).requestDefaultLocation(crimesPresenter);
     }
 
     @Test
     public void shouldHandleLocationPermissionDenied() {
         crimesPresenter.onLocationPermissionDenied();
-        verify(crimesView, once()).showLocationPermissionDeniedError();
-        verify(locationProvider, once()).requestDefaultLocation(eq(crimesPresenter));
+        verify(crimesView).showLocationPermissionDeniedError();
+        verify(locationProvider).requestDefaultLocation(eq(crimesPresenter));
     }
 
     @Test
@@ -152,15 +155,15 @@ public class CrimeListPresenterTests {
         crime2.setCategory("two");
         List<Crime> crimes = Arrays.asList(crime1, crime2);
         crimesPresenter.onCrimesLoadComplete(crimes);
-        verify(crimesView, once()).setCrimes(crimes);
-        verify(crimesView, once()).hideProgress();
+        verify(crimesView).addClusteredCrimes(crimes);
+        verify(crimesView).hideProgress();
     }
 
     @Test
     public void shouldInformNoCrimes() {
         crimesPresenter.onCrimesLoadComplete(new ArrayList<Crime>());
-        verify(crimesView, once()).showNoCrimesMessage();
-        verify(crimesView, once()).hideProgress();
+        verify(crimesView).showNoCrimesMessage();
+        verify(crimesView).hideProgress();
 
     }
 
@@ -175,40 +178,4 @@ public class CrimeListPresenterTests {
         verify(crimesView, times(6)).hideProgress();
         verify(crimesView, times(6)).showCrimesLoadingError();
     }
-
-    /*
-
-    Old tests
-
-     */
-
-    @Test
-    public void shouldShowProgessOnRequestCrimes() {
-        crimesPresenter.onRequestCrimes(1d, 1d);
-        verify(crimesView, once()).showProgress();
-    }
-
-    @Test
-    public void shouldRequestCrimesByPointForView() {
-        double latitude = 1d;
-        double longitude = 2d;
-        crimesPresenter.onRequestCrimes(latitude, longitude);
-        ArgumentCaptor<Double> latCaptor = forClass(Double.class);
-        ArgumentCaptor<Double> longCaptor = forClass(Double.class);
-        verify(policeClient, once()).requestCrimesByPoint(latCaptor.capture(), longCaptor
-                .capture(), eq(crimesPresenter));
-        assertEquals(Double.valueOf(latitude), latCaptor.getValue());
-        assertEquals(Double.valueOf(longitude), longCaptor.getValue());
-    }
-
-
-
-    @Test
-    public void shouldGetLocalCrimes() throws CurrentLocationProvider.MissingPermissionException {
-        crimesPresenter.onRequestLocalCrimes();
-        verify(crimesView, once()).showProgress();
-        verify(locationProvider, once()).requestCurrentLocation(eq(crimesPresenter));
-    }
-
-
 }

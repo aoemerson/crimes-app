@@ -7,6 +7,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.List;
 
@@ -19,7 +21,7 @@ import io.github.aoemerson.crimesmvp.model.data.Crime;
 import io.github.aoemerson.crimesmvp.presenter.CrimeListPresenterImpl;
 import io.github.aoemerson.crimesmvp.presenter.DaggerLocalCrimesComponent;
 
-public class CrimesMapActivity extends BaseActivity implements OnMapReadyCallback {
+public class CrimesMapActivity extends BaseActivity implements OnMapReadyCallback, GoogleMap.OnCameraIdleListener {
 
 
     @Inject CrimeListPresenterImpl crimePresenter;
@@ -78,13 +80,19 @@ onCreate(), onStart(), onResume(), onPause(), onStop(), onDestroy(), onSaveInsta
     }
 
     @Override
-    public void setCrimes(List<Crime> crimes) {
-//        for (Crime crime : crimes) {
-//
-//            googleMap.addMarker(new MarkerOptions()
-//                    .position(new LatLng(crime.getLocation().getLatitude(), crime.getLocation().getLongitude()))
-//                    .title(crime.getCategory()));
-//        }
+    public void addClusteredCrimes(List<Crime> crimes) {
+        for (Crime crime : crimes) {
+
+            googleMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(crime.getLocation().getLatitude(), crime.getLocation()
+                                                                                 .getLongitude()))
+                    .title(crime.getCategory()));
+        }
+    }
+
+    @Override
+    public void addCrime(Crime crime) {
+
     }
 
     @Override
@@ -131,8 +139,16 @@ onCreate(), onStart(), onResume(), onPause(), onStop(), onDestroy(), onSaveInsta
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
+        googleMap.setOnCameraIdleListener(this);
         crimePresenter.onStart();
-        crimePresenter.onRequestLocalCrimes();
 
+    }
+
+    @Override
+    public void onCameraIdle() {
+        LatLngBounds latLngBounds = googleMap.getProjection().getVisibleRegion().latLngBounds;
+        crimePresenter
+                .mapBoundsChanged(latLngBounds.southwest.latitude, latLngBounds.southwest.longitude,
+                        latLngBounds.northeast.latitude, latLngBounds.northeast.longitude);
     }
 }

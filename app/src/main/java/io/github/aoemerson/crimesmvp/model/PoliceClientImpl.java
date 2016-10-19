@@ -113,6 +113,15 @@ public class PoliceClientImpl implements PoliceClient {
 
     @Override
     public void requestCrimesByPoint(double lat, double lng, OnCrimesLoadedListener listener) {
-        policeRestClient.getCrimesByPoint(lat,lng).enqueue(new RestCallback(listener));
+        policeRestClient.getCrimesByPoint(lat, lng).enqueue(new RestCallback(listener));
     }
+
+    @Override
+    public void requestCrimesByRectangularBounds(double southWestLat, double southWestLng, double northEastLat, double northEastLng, OnCrimesLoadedListener listener) {
+        policeRestClient
+                .getCrimesByRectangle(new PoliceRestClient.RectangleBounds(southWestLat, southWestLng, northEastLat, northEastLng))
+                .enqueue(new RestCallback(listener));
+    }
+
+
 }

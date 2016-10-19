@@ -24,25 +24,22 @@ public class CrimeListPresenterImpl implements CrimeListPresenter {
         this.locationProvider = locationProvider;
     }
 
-    @Override
-    public void onRequestCrimes(double latitude, double longitude) {
-        crimesView.showProgress();
-        policeClient.requestCrimesByPoint(latitude, longitude, this);
-    }
 
     @Override
-    public void onRequestLocalCrimes() {
+    public void mapBoundsChanged(double southWestLat, double southWestLng, double northEastLat, double northEastLng) {
         crimesView.showProgress();
-        try {
-            locationProvider.requestCurrentLocation(this);
-        } catch (GoogleFusedLocationProvider.MissingPermissionException e) {
-            crimesView.requestLocationPermission(this);
-        }
+        policeClient
+                .requestCrimesByRectangularBounds(southWestLat, southWestLng, northEastLat, northEastLng, this);
     }
 
     @Override
     public void onStart() {
         locationProvider.connect();
+        try {
+            locationProvider.requestCurrentLocation(this);
+        } catch (GoogleFusedLocationProvider.MissingPermissionException e) {
+            crimesView.requestLocationPermission(this);
+        }
     }
 
     @Override
@@ -64,7 +61,7 @@ public class CrimeListPresenterImpl implements CrimeListPresenter {
     public void onCrimesLoadComplete(List<Crime> crimes) {
         if (crimesView != null) {
             if (crimes != null && crimes.size() > 0) {
-                crimesView.setCrimes(crimes);
+                crimesView.addClusteredCrimes(crimes);
             } else {
                 crimesView.showNoCrimesMessage();
             }
@@ -112,7 +109,6 @@ public class CrimeListPresenterImpl implements CrimeListPresenter {
     @Override
     public void onLocationObtained(double lat, double lng) {
         crimesView.showCurrentLocation(lat, lng);
-        policeClient.requestCrimesByPoint(lat, lng, this);
     }
 
     @Override
@@ -131,7 +127,11 @@ public class CrimeListPresenterImpl implements CrimeListPresenter {
 
     @Override
     public void onLocationPermissionGranted() {
-        onRequestLocalCrimes();
+        try {
+            locationProvider.requestCurrentLocation(this);
+        } catch (GoogleFusedLocationProvider.MissingPermissionException e) {
+            locationProvider.requestDefaultLocation(this);
+        }
     }
 
     @Override

@@ -23,4 +23,6 @@ public interface PoliceClient {
 
     void requestCrimesByPoint(double lat, double lng, OnCrimesLoadedListener listener);
 
+    void requestCrimesByRectangularBounds(double southEastLat, double southEastLng, double northEastLat, double northEastLng, OnCrimesLoadedListener listener);
+
 }
