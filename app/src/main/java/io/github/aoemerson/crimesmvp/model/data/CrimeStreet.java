@@ -11,6 +11,7 @@ public class CrimeStreet {
     private int id;
     private String name;
 
+
     public CrimeStreet() {
     }
 
@@ -18,6 +19,11 @@ public class CrimeStreet {
         this.id = streetId;
         this.name = street;
 
+    }
+
+    public CrimeStreet(CrimeStreet street) {
+        this.id = street.id;
+        this.name = street.name;
     }
 
     public String getName() {

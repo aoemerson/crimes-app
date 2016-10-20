@@ -1,6 +1,5 @@
 package io.github.aoemerson.crimesmvp.model;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +28,7 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -113,7 +113,32 @@ public class PoliceClientTests {
         ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
         verify(crimesLoadedListener, times(1))
                 .onCrimesLoadComplete(captor.capture());
-        assertThat(captor.getValue().size(), CoreMatchers.is(2));
+        assertThat(captor.getValue().size(), is(2));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldContainDeserialisedFields() throws Exception {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .addHeader("content-type", "application/json")
+                .setBody(FileUtils.loadResourceAsString("test1Crimes.json")));
+
+        policeClient.requestCrimesByPoint(55d, 0d, crimesLoadedListener);
+        countDownLatch.await();
+
+        ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
+        verify(crimesLoadedListener, times(1))
+                .onCrimesLoadComplete(captor.capture());
+        Crime expectedCrime = new Crime.Builder()
+                .id(20606881L)
+                .category("anti-social-behaviour")
+                .location(52.625325D, -1.110284D, "On or near Draper Street", 882469)
+                .monthString("2013-01")
+                .build();
+
+        Crime actualCrime = (Crime) captor.getValue().get(0);
+        assertThat(actualCrime, is(expectedCrime));
     }
 
 
@@ -173,7 +198,7 @@ public class PoliceClientTests {
         ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
         verify(crimesLoadedListener, times(1))
                 .onCrimesLoadComplete(captor.capture());
-        assertThat(captor.getValue().size(), CoreMatchers.is(2));
+        assertThat(captor.getValue().size(), is(2));
     }
 
     @Test
@@ -255,7 +280,7 @@ public class PoliceClientTests {
                 northEastLng, crimesLoadedListener);
         countDownLatch.await();
         RecordedRequest recordedRequest = mockWebServer.takeRequest();
-        assertThat(recordedRequest.getPath(), CoreMatchers.is(String
+        assertThat(recordedRequest.getPath(), is(String
                 .format(Locale.UK,
                         "/crimes-street/all-crime?poly=%f,%f:%f,%f:%f,%f:%f,%f",
                         southWestLat, southWestLng, northEastLat, southWestLng,

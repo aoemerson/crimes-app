@@ -1,0 +1,17 @@
+{
+  "all-crime": "All crime",
+  "anti-social-behaviour": "Anti-social behaviour",
+  "bicycle-theft": "Bicycle theft",
+  "burglary": "Burglary",
+  "criminal-damage-arson": "Criminal damage and arson",
+  "drugs": "Drugs",
+  "other-theft": "Other theft",
+  "possession-of-weapons": "Possession of weapons",
+  "public-order": "Public order",
+  "robbery": "Robbery",
+  "vehicle-crime": "Vehicle crime",
+  "violent-crime": "Violence and sexual offences",
+  "other-crime": "Other crime",
+  "shoplifting": "Shoplifting",
+  "theft-from-the-person": "Theft from the person"
+}

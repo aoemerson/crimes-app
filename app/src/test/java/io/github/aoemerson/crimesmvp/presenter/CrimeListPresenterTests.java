@@ -5,26 +5,33 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import io.github.aoemerson.crimesmvp.model.PoliceClient;
 import io.github.aoemerson.crimesmvp.model.data.Crime;
+import io.github.aoemerson.crimesmvp.model.data.CrimeTranslator;
 import io.github.aoemerson.crimesmvp.model.location.CurrentLocationProvider;
+import io.github.aoemerson.crimesmvp.util.CrimeTestFactory;
 import io.github.aoemerson.crimesmvp.view.CrimesView;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -39,11 +46,22 @@ public class CrimeListPresenterTests {
     @Mock
     CurrentLocationProvider locationProvider;
 
+    @Mock
+    CrimeTranslator crimeTranslator;
+
     private CrimeListPresenterImpl crimesPresenter;
 
     @Before
     public void setup() {
-        crimesPresenter = new CrimeListPresenterImpl(policeClient, locationProvider);
+        crimesPresenter = new CrimeListPresenterImpl(policeClient, locationProvider, crimeTranslator);
+
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                return invocation.getArguments()[0];
+            }
+        }).when(crimeTranslator).translate(Mockito.any(Crime.class));
+
         crimesPresenter.attach(crimesView);
     }
 
@@ -148,15 +166,13 @@ public class CrimeListPresenterTests {
     }
 
     @Test
-    public void shouldDisplayLoadedCrimes() {
-        Crime crime1 = new Crime();
-        crime1.setCategory("one");
-        Crime crime2 = new Crime();
-        crime2.setCategory("two");
-        List<Crime> crimes = Arrays.asList(crime1, crime2);
+    public void shouldShowLoadedCrimes() {
+        int numCrimes = 10;
+        List<Crime> crimes = CrimeTestFactory.createCrimes(numCrimes);
         crimesPresenter.onCrimesLoadComplete(crimes);
-        verify(crimesView).addClusteredCrimes(crimes);
+        verify(crimesView, times(numCrimes)).addCrime(any(Crime.class));
         verify(crimesView).hideProgress();
+        verify(crimesView).finishedAddingCrimes();
     }
 
     @Test
@@ -177,5 +193,20 @@ public class CrimeListPresenterTests {
         crimesPresenter.onReadTimeOut(new Exception());
         verify(crimesView, times(6)).hideProgress();
         verify(crimesView, times(6)).showCrimesLoadingError();
+    }
+
+    @Test
+    public void shouldOnlyAddNewCrimesForArea() {
+        List<Crime> crimesRequest1 = CrimeTestFactory.createCrimes(20);
+
+        ArrayList<Crime> crimesRequest2 = new ArrayList<>(crimesRequest1.subList(0, 9));
+        crimesRequest2.addAll(CrimeTestFactory.createCrimes(5));
+        crimesPresenter.onCrimesLoadComplete(crimesRequest1);
+        crimesPresenter.onCrimesLoadComplete(crimesRequest2);
+        verify(crimesView, times(25)).addCrime(any(Crime.class));
+        verify(crimesView, times(2)).hideProgress();
+        verify(crimesView, times(2)).finishedAddingCrimes();
+        verifyNoMoreInteractions(crimesView);
+        verifyZeroInteractions(policeClient);
     }
 }

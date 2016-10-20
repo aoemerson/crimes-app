@@ -16,10 +16,18 @@ public class CrimeLocation {
     public CrimeLocation() {
     }
 
+
     CrimeLocation(double lat, double lng, String street, int streetId) {
         this.latitude = lat;
         this.longitude = lng;
         this.street = new CrimeStreet(streetId, street);
+
+    }
+
+    public CrimeLocation(CrimeLocation location) {
+        this.latitude = location.latitude;
+        this.longitude = location.longitude;
+        this.street = location.street != null ? new CrimeStreet(location.street) : null;
 
     }
 
@@ -44,17 +52,8 @@ public class CrimeLocation {
         return latitude;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        CrimeLocation that = (CrimeLocation) o;
-
-        if (Double.compare(that.latitude, latitude) != 0) return false;
-        if (Double.compare(that.longitude, longitude) != 0) return false;
-        return street != null ? street.equals(that.street) : that.street == null;
-
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 
     @Override
@@ -69,8 +68,17 @@ public class CrimeLocation {
         return result;
     }
 
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CrimeLocation that = (CrimeLocation) o;
+
+        if (Double.compare(that.latitude, latitude) != 0) return false;
+        if (Double.compare(that.longitude, longitude) != 0) return false;
+        return street != null ? street.equals(that.street) : that.street == null;
+
     }
 
     @Override

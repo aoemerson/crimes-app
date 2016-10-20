@@ -10,19 +10,61 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Crime {
 
+    public static class Builder {
+
+        private Crime crime;
+
+        public Builder() {
+            this.crime = new Crime();
+        }
+
+        public Builder id(long id) {
+            crime.id = id;
+            return this;
+        }
+
+        public Builder category(String category) {
+            crime.category = category;
+            return this;
+        }
+
+        public Builder location(double latitude, double longitude, String street, int streetId) {
+            crime.location = new CrimeLocation(latitude, longitude, street, streetId);
+            return this;
+        }
+
+        public Builder monthString(String monthString) {
+            crime.monthString = monthString;
+            return this;
+        }
+
+        public Crime build() {
+            return crime;
+        }
+    }
     private String category;
     private CrimeLocation location;
     @JsonProperty("month")
     private String monthString;
+    private long id;
 
     public Crime() {
 
     }
 
-    Crime(String category, String monthString, float lat, float lng, String street, int streetId) {
+    Crime(long id, String category, String monthString, double lat, double lng, String street, int streetId) {
+        this.id = id;
         this.category = category;
         this.location = new CrimeLocation(lat, lng, street, streetId);
         this.monthString = monthString;
+    }
+
+    public Crime(Crime crime) {
+        this.id = crime.id;
+        this.category = crime.category;
+
+        this.location = crime.location != null ? new CrimeLocation(crime.location) : null;
+        this.monthString = crime.monthString;
     }
 
     public String getCategory() {
@@ -51,9 +93,10 @@ public class Crime {
 
     @Override
     public int hashCode() {
-        int result = category != null ? category.hashCode() : 0;
-        result = 31 * result + (location != null ? location.hashCode() : 0);
-        result = 31 * result + (monthString != null ? monthString.hashCode() : 0);
+        int result = category.hashCode();
+        result = 31 * result + location.hashCode();
+        result = 31 * result + monthString.hashCode();
+        result = 31 * result + (int) (id ^ (id >>> 32));
         return result;
     }
 
@@ -64,12 +107,10 @@ public class Crime {
 
         Crime crime = (Crime) o;
 
-        if (category != null ? !category.equals(crime.category) : crime.category != null)
-            return false;
-        if (location != null ? !location.equals(crime.location) : crime.location != null)
-            return false;
-        return monthString != null ? monthString
-                .equals(crime.monthString) : crime.monthString == null;
+        if (id != crime.id) return false;
+        if (!category.equals(crime.category)) return false;
+        if (!location.equals(crime.location)) return false;
+        return monthString.equals(crime.monthString);
 
     }
 
@@ -79,6 +120,15 @@ public class Crime {
                 "category='" + category + '\'' +
                 ", location=" + location +
                 ", monthString='" + monthString + '\'' +
+                ", id=" + id +
                 '}';
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

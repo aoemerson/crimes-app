@@ -24,4 +24,6 @@ public interface CrimesView {
     void showLocationUnavailableError();
     boolean hasLocationPersmission();
     void showCurrentLocation(double lat, double lng);
+
+    void finishedAddingCrimes();
 }
