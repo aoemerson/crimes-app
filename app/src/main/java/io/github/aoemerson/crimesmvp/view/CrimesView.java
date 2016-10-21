@@ -25,5 +25,8 @@ public interface CrimesView {
     boolean hasLocationPersmission();
     void showCurrentLocation(double lat, double lng);
 
+    void showCrimes(List<Crime> crimes);
+
+    void showCrime(Crime crime);
     void finishedAddingCrimes();
 }

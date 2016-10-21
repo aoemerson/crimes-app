@@ -2,6 +2,7 @@ package io.github.aoemerson.crimesmvp.presenter;
 
 import android.annotation.SuppressLint;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -64,6 +65,23 @@ public class CrimeListPresenterImpl implements CrimeListPresenter {
     @Override
     public void detach() {
         crimesView = null;
+    }
+
+    @Override
+    public void crimesGroupClicked(double lat, double lng, long[] crimeIds) {
+        ArrayList<Crime> crimesToShow = new ArrayList<>();
+        for (long id : crimeIds) {
+            if (crimesAlreadyAdded.containsKey(id))
+                crimesToShow.add(crimeTranslator.translate(crimesAlreadyAdded.get(id)));
+        }
+        if (crimesToShow.size() > 0) {
+            crimesView.showCrimes(crimesToShow);
+        }
+    }
+
+    @Override
+    public void crimeMarkerClicked(long id) {
+        crimesView.showCrime(crimeTranslator.translate(crimesAlreadyAdded.get(id)));
     }
 
     @Override

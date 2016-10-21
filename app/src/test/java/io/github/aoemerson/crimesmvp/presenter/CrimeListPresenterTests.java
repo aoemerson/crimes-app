@@ -3,6 +3,8 @@ package io.github.aoemerson.crimesmvp.presenter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -17,6 +19,7 @@ import io.github.aoemerson.crimesmvp.model.data.Crime;
 import io.github.aoemerson.crimesmvp.model.data.CrimeTranslator;
 import io.github.aoemerson.crimesmvp.model.location.CurrentLocationProvider;
 import io.github.aoemerson.crimesmvp.util.CrimeTestFactory;
+import io.github.aoemerson.crimesmvp.util.TestLogging;
 import io.github.aoemerson.crimesmvp.view.CrimesView;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -50,9 +53,12 @@ public class CrimeListPresenterTests {
     CrimeTranslator crimeTranslator;
 
     private CrimeListPresenterImpl crimesPresenter;
+    @Captor
+    private ArgumentCaptor<List<Crime>> crimeListCaptor;
 
     @Before
     public void setup() {
+        TestLogging.initTimber();
         crimesPresenter = new CrimeListPresenterImpl(policeClient, locationProvider, crimeTranslator);
 
         doAnswer(new Answer() {
@@ -208,5 +214,42 @@ public class CrimeListPresenterTests {
         verify(crimesView, times(2)).finishedAddingCrimes();
         verifyNoMoreInteractions(crimesView);
         verifyZeroInteractions(policeClient);
+    }
+
+    @Test
+    public void shouldShowCrimeOnCrimeMarkerClicked() {
+        int numCrimes = 20;
+        List<Crime> crimes = CrimeTestFactory.createCrimes(numCrimes);
+        int crimeIdx = 0;
+        long id = crimes.get(crimeIdx).getId();
+        crimesPresenter.onCrimesLoadComplete(crimes);
+        crimesPresenter.crimeMarkerClicked(id);
+        verify(crimesView, times(1)).showCrime(crimes.get(crimeIdx));
+
+        verify(crimeTranslator, times(numCrimes + 1)).translate(any(Crime.class));
+    }
+
+    @Test
+    public void shouldShowCrimesOnCrimesGroupClicked() {
+        int numCrimes = 20;
+        List<Crime> crimes = CrimeTestFactory.createCrimes(numCrimes);
+        int[] crimeIndices = {0, 1, 3, 5};
+        long[] ids = new long[crimeIndices.length];
+        for (int i = 0; i < crimeIndices.length; i++) {
+            ids[i] = crimes.get(crimeIndices[i]).getId();
+        }
+
+        crimesPresenter.onCrimesLoadComplete(crimes);
+        crimesPresenter.crimesGroupClicked(ids);
+        verify(crimesView).showCrimes(crimeListCaptor.capture());
+
+        List<Crime> crimesToDisplay = crimeListCaptor.getValue();
+        assertThat(crimesToDisplay.size(), is(crimeIndices.length));
+
+        for (int i : crimeIndices) {
+            assertThat(crimesToDisplay.contains(crimes.get(i)), is(true));
+        }
+
+        verify(crimeTranslator, times(numCrimes + crimeIndices.length)).translate(any(Crime.class));
     }
 }

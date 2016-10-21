@@ -12,4 +12,8 @@ public interface CrimeListPresenter extends PoliceClient.OnCrimesLoadedListener,
     void attach(CrimesView view);
     void detach();
 
+    void crimesGroupClicked(double lat, double lng, long[] crimeIds);
+
+    void crimeMarkerClicked(long id);
+
 }

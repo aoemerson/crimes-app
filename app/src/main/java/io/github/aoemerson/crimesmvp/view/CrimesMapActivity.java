@@ -1,7 +1,12 @@
 package io.github.aoemerson.crimesmvp.view;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -10,13 +15,16 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
+import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import aoemerson.github.io.crimesmvp.R;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.github.aoemerson.crimesmvp.application.ApplicationModule;
 import io.github.aoemerson.crimesmvp.model.data.Crime;
@@ -24,14 +32,23 @@ import io.github.aoemerson.crimesmvp.model.data.CrimeClusterItem;
 import io.github.aoemerson.crimesmvp.presenter.CrimeListPresenterImpl;
 import io.github.aoemerson.crimesmvp.presenter.DaggerLocalCrimesComponent;
 
-public class CrimesMapActivity extends BaseActivity implements OnMapReadyCallback, GoogleMap.OnCameraIdleListener, GoogleMap.OnMarkerClickListener {
+public class CrimesMapActivity extends BaseActivity
+        implements OnMapReadyCallback,
+        GoogleMap.OnCameraIdleListener,
+        GoogleMap.OnMarkerClickListener,
+        ClusterManager.OnClusterClickListener<CrimeClusterItem>,
+        ClusterManager.OnClusterItemClickListener<CrimeClusterItem> {
 
 
     @Inject CrimeListPresenterImpl crimePresenter;
+    @BindView(R.id.crimes_list_view) RecyclerView crimesRecyclerView;
+    @BindView(R.id.bottom_sheet) CardView bottomSheet;
+
     private GoogleMap googleMap;
     private SupportMapFragment mapFragment;
-
     private ClusterManager<CrimeClusterItem> clusterManager;
+    private CrimesRecyclerViewAdapter crimesRecyclerViewAdapter;
+    private BottomSheetBehavior<CardView> bottomSheetBehaviour;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +63,18 @@ public class CrimesMapActivity extends BaseActivity implements OnMapReadyCallbac
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        crimesRecyclerViewAdapter = new CrimesRecyclerViewAdapter();
+        crimesRecyclerView.setAdapter(crimesRecyclerViewAdapter);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        crimesRecyclerView.setLayoutManager(layoutManager);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, layoutManager
+                .getOrientation());
+        crimesRecyclerView
+                .addItemDecoration(dividerItemDecoration);
+        bottomSheetBehaviour = BottomSheetBehavior
+                .from(bottomSheet);
+
     }
 
     /*
@@ -71,6 +100,22 @@ onCreate(), onStart(), onResume(), onPause(), onStop(), onDestroy(), onSaveInsta
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onBackPressed() {
+        switch (bottomSheetBehaviour.getState()) {
+            case BottomSheetBehavior.STATE_COLLAPSED:
+                bottomSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
+                break;
+            case BottomSheetBehavior.STATE_EXPANDED:
+                crimesRecyclerView.scrollToPosition(0);
+                bottomSheetBehaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                break;
+            default:
+                super.onBackPressed();
+                break;
+        }
     }
 
     @Override
@@ -125,30 +170,37 @@ onCreate(), onStart(), onResume(), onPause(), onStop(), onDestroy(), onSaveInsta
 
     @Override
     public void showLocationPermissionDeniedError() {
-
+        Toast.makeText(this, "Location permission denied - showing London instead.", Toast.LENGTH_SHORT)
+             .show();
     }
 
     @Override
     public void showLocationUnavailableError() {
+        Toast.makeText(this, "Current location unavailable - showing London instead.", Toast.LENGTH_SHORT)
+             .show();
 
     }
 
     @Override
+    @SuppressWarnings({"MissingPermission"}) // already checked by this stage
     public void showCurrentLocation(double lat, double lng) {
-//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(lat, lng)));
         LatLng latLng = new LatLng(lat, lng);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f));
-//        try {
-//            googleMap.setMyLocationEnabled(true);
-//        } catch (SecurityException e) {
-//            googleMap.addCircle(new CircleOptions()
-//                    .center(latLng)
-//                    .clickable(false)
-//                    .fillColor(Color.BLUE)
-//                    .radius(20)
-//                    .strokeWidth(0f)
-//                    .zIndex(Float.MAX_VALUE));
-//        }
+        if (googleMap != null && hasLocationPersmission()) {
+            googleMap.setMyLocationEnabled(true);
+        }
+    }
+
+    @Override
+    public void showCrimes(List<Crime> crimes) {
+        crimesRecyclerViewAdapter.setCrimes(crimes);
+        if (bottomSheetBehaviour.getState() != BottomSheetBehavior.STATE_COLLAPSED)
+            bottomSheetBehaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    }
+
+    @Override
+    public void showCrime(Crime crime) {
+
     }
 
     @Override
@@ -157,13 +209,16 @@ onCreate(), onStart(), onResume(), onPause(), onStop(), onDestroy(), onSaveInsta
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(final GoogleMap googleMap) {
         this.googleMap = googleMap;
-
         googleMap.setMinZoomPreference(10f);
-        clusterManager = new ClusterManager<>(this, googleMap);
         googleMap.setOnCameraIdleListener(this);
         googleMap.setOnMarkerClickListener(this);
+
+        clusterManager = new ClusterManager<>(this, googleMap);
+        clusterManager.setOnClusterClickListener(this);
+        clusterManager.setOnClusterItemClickListener(this);
+
         crimePresenter.onStart();
 
     }
@@ -183,11 +238,21 @@ onCreate(), onStart(), onResume(), onPause(), onStop(), onDestroy(), onSaveInsta
     }
 
     @Override
-    @SuppressWarnings({"MissingPermission"})
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (googleMap != null && hasLocationPersmission()) {
-            googleMap.setMyLocationEnabled(true);
+    public boolean onClusterClick(Cluster<CrimeClusterItem> cluster) {
+
+        Collection<CrimeClusterItem> items = cluster.getItems();
+        long[] ids = new long[items.size()];
+        int i = 0;
+        for (CrimeClusterItem item : items) {
+            ids[i++] = item.getCrime().getId();
         }
+        crimePresenter.crimesGroupClicked(cluster.getPosition().latitude, cluster
+                .getPosition().longitude, ids);
+        return true;
+    }
+
+    @Override
+    public boolean onClusterItemClick(CrimeClusterItem crimeClusterItem) {
+        return false;
     }
 }

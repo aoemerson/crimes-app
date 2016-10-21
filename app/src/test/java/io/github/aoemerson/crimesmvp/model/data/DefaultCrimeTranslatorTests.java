@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import timber.log.Timber;
+import io.github.aoemerson.crimesmvp.util.TestLogging;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -50,19 +50,7 @@ public class DefaultCrimeTranslatorTests {
 
     @Before
     public void setup() {
-        Timber.plant(new Timber.Tree() {
-            @Override
-            protected void log(int priority, String tag, String message, Throwable t) {
-                StringBuilder st = new StringBuilder();
-                for (StackTraceElement element : t.getStackTrace()) {
-                    st.append(element.toString());
-                    st.append("\n");
-                }
-
-                System.out
-                        .println(String.format("%s: %s%n%s%n%s", tag, message, t.getMessage(), st));
-            }
-        });
+        TestLogging.initTimber();
     }
 
     @Test
