@@ -1,13 +1,13 @@
 Crimes Map
 ==========
 
-This android app is a _work-in-progress_ which intends to show on a map of UK crimes committed in a locality.
+This android app is a _work-in-progress_ which intends to show a map of UK crimes committed in a locality.
 
 The app sources information about Crimes from the [police.uk](https://www.police.uk/) crime [API](https://data.police.uk/docs/).
 
 The goal of this project is to build a robust, useful app which follows Material Design principles and could scale to a larger team and / or user-base. As such, the focus is more on architecture, process and "testability" than on being fully-featured.
 
-####Technologies / techniques used
+###Technologies / techniques used
 
 * **Model-View-Presenter** architecture in order to ensure clean separation of concerns as much as possible and to facilitate as much unit-testing (without instrumentation) as possible.
 * **[Dagger 2](https://google.github.io/dagger/) for dependency injection** to assist with separation of concerns, aid testability and avoid the referencing of Android `Context` objects in Presenter code.
