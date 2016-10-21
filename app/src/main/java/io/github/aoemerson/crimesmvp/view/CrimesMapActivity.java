@@ -1,11 +1,13 @@
 package io.github.aoemerson.crimesmvp.view;
 
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.MotionEvent;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -63,7 +65,6 @@ public class CrimesMapActivity extends BaseActivity
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
         crimesRecyclerViewAdapter = new CrimesRecyclerViewAdapter();
         crimesRecyclerView.setAdapter(crimesRecyclerViewAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -75,6 +76,22 @@ public class CrimesMapActivity extends BaseActivity
         bottomSheetBehaviour = BottomSheetBehavior
                 .from(bottomSheet);
 
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        // Dismiss bottom sheet if the user touches outside it.
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            if (bottomSheetBehaviour.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                Rect bottomSheetRect = new Rect();
+                bottomSheet.getGlobalVisibleRect(bottomSheetRect);
+                if (!bottomSheetRect.contains(((int) ev.getRawX()), ((int) ev.getRawY()))) {
+                    bottomSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
+                    return true;
+                }
+            }
+        }
+        return super.dispatchTouchEvent(ev);
     }
 
     /*
@@ -214,6 +231,7 @@ onCreate(), onStart(), onResume(), onPause(), onStop(), onDestroy(), onSaveInsta
         googleMap.setMinZoomPreference(10f);
         googleMap.setOnCameraIdleListener(this);
         googleMap.setOnMarkerClickListener(this);
+
 
         clusterManager = new ClusterManager<>(this, googleMap);
         clusterManager.setOnClusterClickListener(this);
