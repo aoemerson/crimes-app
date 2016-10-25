@@ -11,8 +11,9 @@ public interface CrimesView {
         void onLocationPermissionDenied();
     }
 
-    void setCrimes(List<Crime> crimes);
+    void addClusteredCrimes(List<Crime> crimes);
 
+    void addCrime(Crime crime);
     void showNoCrimesMessage();
     void showProgress();
     void hideProgress();
@@ -22,4 +23,11 @@ public interface CrimesView {
     void showLocationPermissionDeniedError();
     void showLocationUnavailableError();
     boolean hasLocationPersmission();
+    void showCurrentLocation(double lat, double lng);
+
+    void showCrimes(List<Crime> crimes);
+
+    void showCrime(Crime crime);
+    void clearCrimes();
+    void finishedAddingCrimes();
 }

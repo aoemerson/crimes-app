@@ -15,6 +15,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
+import timber.log.Timber;
 
 /**
  * Created by Andrew on 17/08/2016.
@@ -31,6 +32,9 @@ public class PoliceClientImpl implements PoliceClient {
 
         @Override
         public void onResponse(Call<List<Crime>> call, Response<List<Crime>> response) {
+            String url = call.request().url().toString();
+            String method = call.request().method();
+            Timber.v("%s", response.code());
             if (response.isSuccessful()) {
                 listener.onCrimesLoadComplete(response.body());
             } else {
@@ -42,11 +46,18 @@ public class PoliceClientImpl implements PoliceClient {
                         handleUserError(response);
                     }
                 } else if (code >= 500 && code < 600) {
-                    handleServerError(response);
+                    if (code == 503)
+                        handleAreaTooLarge();
+                    else
+                        handleServerError(response);
                 } else {
                     handleOtherError(response);
                 }
             }
+        }
+
+        private void handleAreaTooLarge() {
+            listener.onQueryAreaTooLarge();
         }
 
         @Override
@@ -113,6 +124,15 @@ public class PoliceClientImpl implements PoliceClient {
 
     @Override
     public void requestCrimesByPoint(double lat, double lng, OnCrimesLoadedListener listener) {
-        policeRestClient.getCrimesByPoint(lat,lng).enqueue(new RestCallback(listener));
+        policeRestClient.getCrimesByPoint(lat, lng).enqueue(new RestCallback(listener));
     }
+
+    @Override
+    public void requestCrimesByRectangularBounds(double southWestLat, double southWestLng, double northEastLat, double northEastLng, OnCrimesLoadedListener listener) {
+        policeRestClient
+                .getCrimesByRectangle(new PoliceRestClient.RectangleBounds(southWestLat, southWestLng, northEastLat, northEastLng))
+                .enqueue(new RestCallback(listener));
+    }
+
+
 }

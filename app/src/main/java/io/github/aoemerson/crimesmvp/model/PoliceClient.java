@@ -19,8 +19,12 @@ public interface PoliceClient {
         void onTooManyRequests();
 
         void onReadTimeOut(Throwable cause);
+
+        void onQueryAreaTooLarge();
     }
 
     void requestCrimesByPoint(double lat, double lng, OnCrimesLoadedListener listener);
+
+    void requestCrimesByRectangularBounds(double southEastLat, double southEastLng, double northEastLat, double northEastLng, OnCrimesLoadedListener listener);
 
 }
