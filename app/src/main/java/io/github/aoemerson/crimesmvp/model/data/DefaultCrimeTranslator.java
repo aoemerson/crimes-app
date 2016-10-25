@@ -1,6 +1,7 @@
 package io.github.aoemerson.crimesmvp.model.data;
 
 import android.content.Context;
+import android.os.AsyncTask;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,19 +28,20 @@ public class DefaultCrimeTranslator implements CrimeTranslator {
     public DefaultCrimeTranslator(Context context) {
         final InputStream inputStream = context.getResources()
                                                .openRawResource(R.raw.categories_map);
-        new Thread(new Runnable() {
+        new AsyncTask<Void,Void, Void>() {
             @Override
-            public void run() {
-                readCategoryFile(inputStream);
+            protected Void doInBackground(Void... voids) {
+               readCategoryFile(inputStream);
+                return null;
             }
-        }).start();
+
+        }.execute();
     }
 
     synchronized void readCategoryFile(InputStream inputStream) {
         ObjectMapper objectMapper = new ObjectMapper();
         JavaType javaType = objectMapper.getTypeFactory()
                                         .constructMapType(HashMap.class, String.class, String.class);
-
         try {
             categoryMap = objectMapper
                     .readValue(inputStream, javaType);
@@ -50,7 +52,7 @@ public class DefaultCrimeTranslator implements CrimeTranslator {
     }
 
     @Override
-    public Crime translate(Crime crime) {
+    public synchronized Crime translate(Crime crime) {
         Crime translated = new Crime(crime);
         if (categoryMap != null) {
             String mapped = categoryMap.get(crime.getCategory());

@@ -2,9 +2,12 @@ package io.github.aoemerson.crimesmvp.presenter;
 
 import android.annotation.SuppressLint;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
 
 import javax.inject.Inject;
 
@@ -38,6 +41,8 @@ public class CrimeListPresenterImpl implements CrimeListPresenter {
     @Override
     public void mapBoundsChanged(double southWestLat, double southWestLng, double northEastLat, double northEastLng) {
         crimesView.showProgress();
+        Timber.d("Loading the following area from web: %nSW: [%f, %f]%nNE: [%f, %f]", southWestLat, southWestLng, northEastLat, northEastLng);
+        Timber.d("--------> %f%n|%n|%n|%nv%n%f", northEastLng - southWestLng, northEastLat - southWestLat);
         policeClient
                 .requestCrimesByRectangularBounds(southWestLat, southWestLng, northEastLat, northEastLng, this);
     }
@@ -99,6 +104,7 @@ public class CrimeListPresenterImpl implements CrimeListPresenter {
 
     private void checkAndAddCrimes(List<Crime> crimes) {
         int count = 0;
+        long start = System.nanoTime();
         for (Crime crime : crimes) {
             if (!crimesAlreadyAdded.containsKey(crime.getId())) {
                 crimesAlreadyAdded.put(crime.getId(), crime);
@@ -106,11 +112,15 @@ public class CrimeListPresenterImpl implements CrimeListPresenter {
                 count++;
             }
         }
+        long end = System.nanoTime();
         if (count > 0) {
             crimesView.finishedAddingCrimes();
         }
-        Timber.d("Added %d crimes to the display (%d crimes already added)", count, crimes
-                .size() - count);
+//        Timber.v("%d %s [+%.1fms]%n%s", response.code(), response.request()
+//                                                                 .url(), (t2 - t1) / 1e6d,
+
+        Timber.d("Added %d crimes to the display in %.1fms (%d crimes already added, %d in memory)",
+                count, (end - start) / 1e6d, crimes.size() - count, crimesAlreadyAdded.size());
     }
 
     @Override

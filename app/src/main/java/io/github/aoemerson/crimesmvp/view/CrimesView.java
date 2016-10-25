@@ -28,5 +28,6 @@ public interface CrimesView {
     void showCrimes(List<Crime> crimes);
 
     void showCrime(Crime crime);
+    void clearCrimes();
     void finishedAddingCrimes();
 }
