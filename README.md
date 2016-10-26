@@ -1,7 +1,7 @@
 Crimes Map
 ==========
 
-This android app is a _work-in-progress_ which intends to show a map of UK crimes committed in a locality.
+This android app is a _work-in-progress_ (SPOILER: bugs :beetle::beetle::beetle:) which intends to show a map of UK crimes committed in a locality.
 <div align="middle">
 <img src="https://aoemerson.github.io/img/crime-app/map_with_clusters_ressized.png" height=500/><img src="https://aoemerson.github.io/img/crime-app/map_cluster_view_resized.png" height=500/></div>
 
