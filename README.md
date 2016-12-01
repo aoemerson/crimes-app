@@ -3,7 +3,7 @@ Crimes Map
 
 This android app is a _work-in-progress_ (SPOILER: bugs :beetle::beetle::beetle:) which intends to show a map of UK crimes committed in a locality.
 <div align="center">
-<img src="https://aoemerson.github.io/img/crime_app_1.png" height=500/><img src="https://aoemerson.github.io/img/crime_app_2.png" height=500/></div>
+<img src="http://andrewemerson.io/img/crime_app_1.png" height=500/><img src="http://andrewemerson.io/img/crime_app_2.png" height=500/></div>
 
 The app sources information about Crimes from the [police.uk](https://www.police.uk/) crime [API](https://data.police.uk/docs/).
 
